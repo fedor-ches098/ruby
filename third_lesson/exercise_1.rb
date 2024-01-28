@@ -6,10 +6,20 @@ class Station
   end
 
   def show_trains
+    if @trains.empty?
+      puts "Error! No trains in station: #{self.name}"
+      return @trains
+    end
+
     @trains.each {|train| puts "Train number: #{train.number} now in station: #{self.name}"}
   end
 
   def show_trains_by_type(type)
+    if @trains.empty?
+      puts "Error! No trains in station: #{self.name}"
+      return @trains
+    end
+    
     if (type != "cargo") && (type != "passenger")
       puts "Error! Type must be 'cargo' or 'passenger'"
       return @trains
