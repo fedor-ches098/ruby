@@ -19,7 +19,7 @@ class Station
       puts "Error! No trains in station: #{self.name}"
       return @trains
     end
-    
+
     if (type != "cargo") && (type != "passenger")
       puts "Error! Type must be 'cargo' or 'passenger'"
       return @trains
@@ -34,6 +34,11 @@ class Station
   end
 
   def send_train(train)
+    if @trains.empty?
+      puts "Error! No trains in station: #{self.name}"
+      return @trains
+    end
+    
     @trains.delete(train)
     puts "Send train: #{train.number} from station: #{self.name}"
   end
