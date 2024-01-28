@@ -6,19 +6,13 @@ class Station
   end
 
   def show_trains
-    if @trains.empty?
-      puts "Error! No trains in station: #{self.name}"
-      return @trains
-    end
-
+    return @trains if check_trains == false
+    
     @trains.each {|train| puts "Train number: #{train.number} now in station: #{self.name}"}
   end
 
   def show_trains_by_type(type)
-    if @trains.empty?
-      puts "Error! No trains in station: #{self.name}"
-      return @trains
-    end
+    return @trains if check_trains == false
 
     if (type != "cargo") && (type != "passenger")
       puts "Error! Type must be 'cargo' or 'passenger'"
@@ -34,13 +28,19 @@ class Station
   end
 
   def send_train(train)
-    if @trains.empty?
-      puts "Error! No trains in station: #{self.name}"
-      return @trains
-    end
-    
+    return @trains if check_trains == false
+
     @trains.delete(train)
     puts "Send train: #{train.number} from station: #{self.name}"
+  end
+
+  private 
+
+  def check_trains
+    if @trains.empty?
+      puts "Error! No trains in station: #{self.name}"
+      return false
+    end
   end
 end
 
@@ -120,10 +120,7 @@ class Train
   end
 
   def move_train(direction)
-    if route.nil?
-      puts "Error! Route not assign for train: #{self.number}"
-      return false
-    end
+    return false if check_route_assign == false
 
     if (self.current_station == self.route.stations[0]) && (direction == "back")
       puts "Error! Train: #{self.number} in first route station"
@@ -142,14 +139,20 @@ class Train
   end
 
   def show_train_route_info
-    if route.nil?
-      puts "Error! Route not assign for train: #{self.number}"
-      return false
-    end
+    return false if check_route_assign == false
 
     puts "Previous station: #{route.stations[route.stations.find_index(self.current_station) - 1]} for train: #{self.number}"
     puts "Current station: #{self.current_station} for train: #{self.number}"
     puts "Next station: #{route.stations[route.stations.find_index(self.current_station) + 1]} for train: #{self.number}"
+  end
+
+  private 
+
+  def check_route_assign
+    if self.route.nil?
+      puts "Error! Route not assign fro train: #{self.number}"
+      return false
+    end
   end
 end
 
@@ -172,11 +175,13 @@ train_2.move_train("forward")
 train_2.show_train_route_info
 train_3.change_car_count("add")
 puts "-----------------------------------------"
-station = Station.new("Pavshino")
-station.take_train(train_1)
-station.take_train(train_2)
-station.take_train(train_3)
-station.show_trains
-station.show_trains_by_type("cargo")
-station.send_train(train_1)
-station.show_trains
+station_1 = Station.new("Pavshino")
+station_2 = Station.new("Depo")
+station_2.show_trains_by_type("cargo")
+station_1.take_train(train_1)
+station_1.take_train(train_2)
+station_1.take_train(train_3)
+station_1.show_trains
+station_1.show_trains_by_type("cargo")
+station_1.send_train(train_1)
+station_1.show_trains
