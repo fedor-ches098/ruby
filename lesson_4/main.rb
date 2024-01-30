@@ -30,40 +30,40 @@ class Controller
     when 1
       create_station
     when 2
-      create_train
+      station_created? ? create_train : (puts "Станция не создана")
     when 3
       create_route
     when 4
-      add_station if route_created?
+      route_created? ? add_station : (puts "Маршрут не создан")
     when 5
-      remove_station
+      route_created? ? remove_station : (puts "Маршрут не создан")
     when 6
-      add_route if route_created? && train_created?
+      (route_created? && train_created?) ? add_route : (puts "Маршрут и поезд не созданы")
     when 7
-      add_wagon if train_created?
+      train_created? ? add_wagon : (puts "Поезд не создан")
     when 8
-      remove_wagon if train_created? && wagons_exists?
+      (train_created? && wagons_exists?) ? remove_wagon : (puts "Поезд и вагоны не созданы")
     when 9
-      go_next_station if train_created? && route_created?
+      (train_created? && route_created?) ? go_next_station : (puts "Поезд и маршрут не созданы")
     when 10
-      go_previous_station if train_created? && route_created?
+      (train_created? && route_created?) ? go_previous_station : (puts "Поезд и маршрут не созданы")
     when 11
-      show_stations if route_created?
+      route_created? ? show_stations : (puts "Маршрут не создан")
     when 12
-      show_trains if station_created? && train_created?
+      (station_created? && train_created?) ? show_trains : (puts "Станция и поезд не созданы")
     when 13
-      stop
+      exit
     end
   end
 
   TRAIN_TYPE = {
     cargo:     {
-      type: "CargoTrain",
-      wagon_type: "CargoWagon"
+      type: CargoTrain,
+      wagon_type: CargoWagon
     },
     passenger: {
-      type: "PassengerTrain",
-      wagon_type: "PassengerWagon"
+      type: PassengerTrain,
+      wagon_type: PassengerWagon
     }
   }
 
@@ -71,7 +71,7 @@ class Controller
     puts "Введите имя станции:"
     name = gets.chomp
     self.station = Station.new(name)
-    puts "Станция создана: #{self.station.name}"
+    puts "Станция создана"
   end
 
   def create_train
@@ -79,11 +79,9 @@ class Controller
     number = gets.chomp.to_i
     puts "Введите тип поезда:"
     type = gets.chomp 
-    wagon_type = TRAIN_TYPE[type.to_sym][:wagon_type]
-    train_type = TRAIN_TYPE[type.to_sym][:type]
-    self.train = Kernel.const_get(train_type).new(number, type, wagon_type)
+    self.train = TRAIN_TYPE[type.to_sym][:type].new(number, type, TRAIN_TYPE[type.to_sym][:wagon_type])
     add_train
-    puts "Создан поезд. Номер: #{train.number}, тип: #{train.type}"
+    puts "Создан поезд"
   end
 
   def create_route
@@ -144,10 +142,11 @@ class Controller
   end
 
   def show_trains
-    puts "Список поездов: #{self.station.trains.map {|i| i.number}}"
+    puts "Список поездов: #{self.station.trains.count}"
   end
 
   private 
+  # вспомогательные методы
 
   def add_train
     self.station.add_train(self.train)
