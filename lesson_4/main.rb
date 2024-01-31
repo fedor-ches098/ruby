@@ -159,7 +159,11 @@ class Controller
   end
 
   def show_stations
-    puts "Список станций: #{self.stations.map {|station| station.name}}"
+    if self.stations.empty?
+      puts "Станции не созданы"
+    else
+      puts "Список станций: #{self.stations.map {|station| station.name}}"
+    end 
   end
 
   def show_trains
