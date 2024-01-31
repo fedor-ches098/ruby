@@ -8,12 +8,12 @@ require_relative "passenger_wagon"
 require_relative "ui"
 
 class Controller
-  attr_accessor :station, :route, :train, :wagon
+  attr_accessor :stations, :routes, :trains, :wagon
 
   def initialize
-    @station = nil
-    @route   = nil
-    @train   = nil
+    @stations = []
+    @routes   = []
+    @trains   = []
     @wagon   = nil
   end
 
@@ -30,32 +30,36 @@ class Controller
     when 1
       create_station
     when 2
-      station_created? ? create_train : (puts "Станция не создана")
+      create_train
     when 3
       create_route
     when 4
-      route_created? ? add_station : (puts "Маршрут не создан")
+      add_train
     when 5
-      route_created? ? remove_station : (puts "Маршрут не создан")
+      add_station
     when 6
-      (route_created? && train_created?) ? add_route : (puts "Маршрут и поезд не созданы")
+      remove_station
     when 7
-      train_created? ? add_wagon : (puts "Поезд не создан")
+      add_route
     when 8
-      (train_created? && wagons_exists?) ? remove_wagon : (puts "Поезд и вагоны не созданы")
+      add_wagon
     when 9
-      (train_created? && route_created?) ? go_next_station : (puts "Поезд и маршрут не созданы")
+      remove_wagon
     when 10
-      (train_created? && route_created?) ? go_previous_station : (puts "Поезд и маршрут не созданы")
+      go_next_station
     when 11
-      route_created? ? show_stations : (puts "Маршрут не создан")
+      go_previous_station
     when 12
-      (station_created? && train_created?) ? show_trains : (puts "Станция и поезд не созданы")
+      show_stations
     when 13
+      show_trains
+    when 14
       exit
     end
   end
 
+  private 
+  # думаю что эти методы не должны быть вне класса
   TRAIN_TYPE = {
     cargo:     {
       type: CargoTrain,
@@ -70,7 +74,7 @@ class Controller
   def create_station
     puts "Введите имя станции:"
     name = gets.chomp
-    self.station = Station.new(name)
+    self.stations << Station.new(name)
     puts "Станция создана"
   end
 
@@ -79,93 +83,120 @@ class Controller
     number = gets.chomp.to_i
     puts "Введите тип поезда:"
     type = gets.chomp 
-    self.train = TRAIN_TYPE[type.to_sym][:type].new(number, type, TRAIN_TYPE[type.to_sym][:wagon_type])
-    add_train
-    puts "Создан поезд"
+    self.trains << TRAIN_TYPE[type.to_sym][:type].new(number, type, TRAIN_TYPE[type.to_sym][:wagon_type]) 
+    puts "Поезд создан"
   end
 
   def create_route
     puts "Введите исходную и конечную станции:"
     from = gets.chomp
     to = gets.chomp
-    self.route = Route.new(from, to)
-    puts "Создан маршрут: #{self.route.stations}"
+    self.routes << Route.new(from, to)
+    puts "Маршрут создан"
   end
 
   def add_station
+    route = get_route_by_choice
     puts "Введите станцию:"
     station = gets.chomp
-    self.route.add_station(station)
-    puts "Станции: #{self.route.stations}"
+    route.nil? ? (puts "Маршрут не создан") : route.add_station(station)
+    puts "Станции: #{route.stations}" unless route.nil?
   end
 
   def remove_station
+    route = get_route_by_choice
     puts "Введите станцию:"
     station = gets.chomp
-    unless (station == self.route.stations[0]) || (station == self.route.stations[-1])
-      self.route.remove_station(station)
+    unless route.nil?
+      unless (station == route.stations[0]) || (station == route.stations[-1])
+        route.remove_station(station)
+      end
+      puts "Станции: #{route.stations}"
+    else  
+      puts "Маршрут не создан"
     end
-    puts "Станции: #{self.route.stations}"
   end
 
   def add_route
-    self.train.add_route(route)
-    puts "Маршрут добавлен к поезду. Текущая станция: #{self.train.current_station}"
+    route = get_route_by_choice
+    train = get_train_by_choice
+    if (train.nil?) || (route.nil?)
+      puts "Поезд или маршрут не созданы"
+    else 
+      train.add_route(route)
+      puts "Маршрут добавлен к поезду. Текущая станция: #{train.current_station}" 
+    end
   end
 
   def add_wagon
-    wagon_type = self.train.wagon_type
-    puts "Добавление вагона типа #{self.train.type}"
-    self.wagon = Kernel.const_get(wagon_type).new
-    self.train.add_wagon(self.wagon)
-    puts "Количество вагонов поезда: #{self.train.wagons.count}"
+    train = get_train_by_choice
+    self.wagon = train.wagon_type.new
+    train.nil? ? (puts "Поезд не создан") : train.add_wagon(self.wagon)
+    puts train.wagons
+    puts "Количество вагонов поезда: #{train.wagons.count}" unless train.nil?
   end
 
   def remove_wagon
-    puts "Удаление вагона"
-    self.train.remove_wagon
-    puts "Количество вагонов поезда: #{self.train.wagons.count}"
+    train = get_train_by_choice
+    if train.nil?
+      puts "Поезд не создан"
+    else
+      train.wagons.empty? ? (puts "В поезде нет вагонов") : train.remove_wagon
+      puts "Количество вагонов поезда: #{train.wagons.count}"
+    end
   end
 
   def go_next_station
-    puts "Перемещение поезда вперед"
-    self.train.go_next_station
+    train = get_train_by_choice
+    train.nil? ? (puts "Поезд не создан") : train.go_next_station
+    puts "Поезд перемещен вперед" unless train.nil?
   end
 
   def go_previous_station
-    puts "Перемещение поезда назад"
-    self.train.go_previous_station
+    train = get_train_by_choice
+    train.nil? ? (puts "Поезд не создан") : train.go_previous_station
+    puts "Поезд перемещен назад" unless train.nil?
   end
 
   def show_stations
-    puts "Список станций: #{self.route.stations}"
+    puts "Список станций: #{self.stations.map {|station| station.name}}"
   end
 
   def show_trains
-    puts "Список поездов: #{self.station.trains.count}"
+    station = get_station_by_choice
+    station.nil? ? (puts "Станция не создана") : (puts "Список поездов: #{station.trains.count}")
   end
-
-  private 
-  # вспомогательные методы
 
   def add_train
-    self.station.add_train(self.train)
+    train = get_train_by_choice
+    station = get_station_by_choice
+    if (station.nil?) || (train.nil?)
+      puts "Поезд или станция не созданы"
+    else  
+      station.add_train(train)
+      puts "Поезд добален на станцию"
+    end
   end
 
-  def route_created?
-    self.route.nil? ? false : true
+  def get_route_by_choice
+    puts "Введите номер маршрута:"
+    self.routes.each_with_index {|r,n| puts "#{n} #{r.stations}"}
+    index = gets.chomp.to_i
+    return self.routes[index]
   end
 
-  def train_created?
-    self.train.nil? ? false : true
+  def get_train_by_choice
+    puts "Введите номер поезда:"
+    self.trains.each_with_index {|t,n| puts "#{n} #{t.number}"}
+    index = gets.chomp.to_i
+    return self.trains[index]
   end
 
-  def wagons_exists?
-    self.train.wagons.empty? ? false : true
-  end
-
-  def station_created?
-    self.station.nil? ? false : true
+  def get_station_by_choice
+    puts "Введите номер станции:"
+    self.stations.each_with_index {|s,n| puts "#{n} #{s.name}"}
+    index = gets.chomp.to_i
+    return self.stations[index]
   end
 end
 
