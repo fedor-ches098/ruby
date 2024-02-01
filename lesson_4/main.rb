@@ -8,13 +8,12 @@ require_relative "cargo_wagon"
 require_relative "passenger_wagon"
 
 class Controller
-  attr_accessor :stations, :routes, :trains, :wagon
+  attr_accessor :stations, :routes, :trains
 
   def initialize
     @stations = []
     @routes   = []
     @trains   = []
-    @wagon   = nil
   end
 
   def start
@@ -153,7 +152,7 @@ class Controller
     elsif train.type == :passenger
       train.add_wagon(PassengerWagon.new)
     end
-    puts "Количество вагонов поезда: #{train.wagons.count}"
+    puts "Количество вагонов поезда: #{train.wagons}"
   end
 
   def remove_wagon
@@ -181,7 +180,7 @@ class Controller
     if (train.nil?) || (train.route.nil?)
       puts "Поезд не создан или не имеет маршрута"
     else 
-      train.go_previous_station
+      train.go_previous_station 
       puts "Поезд перемещен назад. Текущая станция: #{train.current_station}"
     end
   end
