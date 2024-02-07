@@ -11,7 +11,6 @@ class Train
   attr_reader   :number, :type
 
   NUMBER_FORMAT = /^[а-я0-9]{3}-?[а-я0-9]{2}$/i
-  TYPE_FORMAT   = /^(cargo|passenger)$/
 
   @@trains = {}
 
@@ -65,7 +64,7 @@ class Train
   end
 end
 
-train_1 = Train.new("133-ddddd", "cargo")
+#train_1 = Train.new("133-ddddd", "cargo")
 #train_2 = Train.new("123-аа", "cargo")
 #puts Train.find("13333")
 #train_1.manufacturer = "Mos-Train"

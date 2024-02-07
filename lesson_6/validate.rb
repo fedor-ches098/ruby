@@ -15,7 +15,6 @@ module Validate
       raise "Имя пустое" if self.name.nil?
     when /.*Train$/
       raise "Неправильный формат номера" if self.number !~ self.class::NUMBER_FORMAT
-      raise "Неправильный тип поезда" if self.type !~ self.class::TYPE_FORMAT
     when "Route"
       raise "Станций нет" if self.stations.empty?
     end
