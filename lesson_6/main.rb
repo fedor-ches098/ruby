@@ -88,9 +88,15 @@ class Controller
   end
 
   def create_station
-    name = ask("Введите имя станции:")
-    self.stations << Station.new(name)
-    puts "Станция создана"
+    begin
+      name = ask("Введите имя станции:")
+      self.stations << Station.new(name)
+      puts "Станция создана"
+    rescue StandardError => error
+      puts error
+      puts "Еще раз"
+      retry
+    end
   end
 
   def create_train
@@ -117,17 +123,36 @@ class Controller
   end
 
   def create_route
-    from = ask("Введите исходную станцию:")
-    to = ask("Введите конечную станцию:")
-    self.routes << Route.new(from, to)
-    puts "Маршрут создан"
+    begin
+      from = ask("Введите исходную станцию:")
+      raise "Станции нет" unless station_exists?(from)
+      to = ask("Введите конечную станцию:")
+      raise "Станции нет" unless station_exists?(to)
+      self.routes << Route.new(from, to)
+      puts "Маршрут создан"
+    rescue StandardError => error
+      puts error
+      puts "Еще раз"
+      retry
+    end
+  end
+
+  def station_exists?(station)
+    (stations.map(&:name).include? station) ? true : false
   end
 
   def add_station
-    route = get_by_choice("маршрута", routes, :stations)
-    station = ask("Введите станцию:")
-    route.nil? ? (puts "Маршрут не создан") : route.add_station(station)
-    puts "Станции: #{route.stations}" unless route.nil?
+    begin
+      route = get_by_choice("маршрута", routes, :stations)
+      station = ask("Введите станцию:")
+      raise "Станции нет" unless station_exists?(station)
+      route.nil? ? (puts "Маршрут не создан") : route.add_station(station)
+      puts "Станции: #{route.stations}" unless route.nil?
+    rescue StandardError => error
+      puts error
+      puts "Еще раз"
+      retry
+    end
   end
 
   def remove_station

@@ -12,11 +12,12 @@ module Validate
     case self.class.name
     when "Station"
       raise "Имя слишком длинное" if self.name.length > 10
-      raise "Имя пустое" if self.name.nil?
+      raise "Имя пустое" if self.name.empty?
     when /.*Train$/
       raise "Неправильный формат номера" if self.number !~ self.class::NUMBER_FORMAT
     when "Route"
-      raise "Станций нет" if self.stations.empty?
+      raise "Начальной станции нет" if self.stations[0].empty?
+      raise "Конечной станции нет" if self.stations[-1].empty?
     end
     true
   end

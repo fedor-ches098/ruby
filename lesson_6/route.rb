@@ -25,6 +25,7 @@ class Route
   
 end
 
-#route_1 = Route.new("Ppppp", "D")
+#route_1 = Route.new("","ааааа")
 #puts Route.instances
+#p route_1
 #puts route_1.valid?
