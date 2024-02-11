@@ -1,14 +1,13 @@
 require_relative "wagon"
 
 class PassengerWagon < Wagon
-
-  def initialize(volume)   
+  def initialize(seats)
     @type = :passenger
     super
   end
 
-  def take_place(volume)
-    @used_place += volume if free_place >= volume
+  def take_place
+    @used_place += 1 if free_place > 0
   end
 end
 

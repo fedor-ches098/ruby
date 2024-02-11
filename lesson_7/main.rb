@@ -192,11 +192,11 @@ class Controller
     train = get_by_choice("поезда", trains, :number)
     return (puts "Поезд не создан") if train.nil?
     if train.type == :cargo
-      seats = ask("Введите количество мест:").to_i
-      train.add_wagon(CargoWagon.new(seats))
-    elsif train.type == :passenger
       volume = ask("Введите объем:").to_i
-      train.add_wagon(PassengerWagon.new(volume))
+      train.add_wagon(CargoWagon.new(volume))
+    elsif train.type == :passenger
+      seats = ask("Введите количество мест:").to_i
+      train.add_wagon(PassengerWagon.new(seats))
     end
     puts "Количество вагонов поезда: #{train.wagons.count}"
   end
@@ -206,10 +206,13 @@ class Controller
     return (puts "Поезд не создан") if train.nil?
     train.wagon_block do |wagon|
       puts "Тип вагона: #{wagon.type}"
-      puts "Занято мест: #{wagon.occupied_seats}" if wagon.type == :cargo
-      puts "Свободна мест: #{wagon.free_seats}" if wagon.type == :cargo
-      puts "Занято объема: #{wagon.occupied_volume}" unless wagon.type == :cargo
-      puts "Свободно объема: #{wagon.free_volume}" unless wagon.type == :cargo
+      if wagon.type == :passenger
+        puts "Занято мест: #{wagon.used_place}"
+        puts "Свободно мест: #{wagon.free_place}" 
+      elsif wagon.type == :cargo
+        puts "Занято объема: #{wagon.used_place}"
+        puts "Свободно объема: #{wagon.free_place}"
+      end
     end
   end
 
@@ -227,13 +230,14 @@ class Controller
     train = get_by_choice("поезда", trains, :number)
     return (puts "Поезд не создан") if train.nil?
     wagon = get_by_choice("вагона", train.wagons, :type)
+    return (puts "Вагон не создан") if wagon.nil?
     if wagon.type == :cargo
-      wagon.take_seat
-      puts "Место занято #{wagon.free_seats}"
-    else    
-      value = ask("Введите объем").to_i
-      wagon.take_volume(value)
-      puts "Объем занят #{wagon.free_volume}"
+      volume = ask("Введите объем").to_i
+      wagon.take_place(volume)
+      puts "Объем занят #{wagon.free_place}"
+    elsif wagon.type == :passenger   
+      wagon.take_place
+      puts "Место занято #{wagon.free_place}"
     end
   end
 ######
