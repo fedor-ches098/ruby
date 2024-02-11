@@ -1,24 +1,18 @@
 require_relative "wagon"
 
 class CargoWagon < Wagon
-  attr_reader :type
-
   def initialize(seats)
     @type = :cargo
-    @seats = seats
-    @occupied = 0
+    super
   end
 
-  def take_seat
-    @seats -= 1
-    @occupied += 1
-  end
-
-  def occupied_seats
-    @occupied
-  end
-
-  def free_seats
-    @seats
+  def take_place
+    @used_place += 1 if free_place > 0
   end
 end
+
+
+c = CargoWagon.new(20)
+c.take_place
+c.take_place
+puts c.used_place

@@ -1,26 +1,18 @@
 require_relative "wagon"
 
 class PassengerWagon < Wagon
-  attr_reader :type
 
   def initialize(volume)   
     @type = :passenger
-    @occupied = 0
-    @volume = volume 
+    super
   end
 
-  def take_volume(value)
-    unless @volume < 0 || value > @volume
-      @volume -= value
-      @occupied += value
-    end
-  end
-
-  def occupied_volume
-    @occupied
-  end
-
-  def free_volume
-    @volume
+  def take_place(volume)
+    @used_place += volume if free_place >= volume
   end
 end
+
+# p = PassengerWagon.new(30)
+# p.take_place(3)
+# puts p.free_place
+# puts p.used_place
